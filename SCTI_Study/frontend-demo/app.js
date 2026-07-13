@@ -1,4 +1,10 @@
 import { getBank, login, recordShare, submitQuiz } from "./api/cloud.js";
+import {
+  buildAnswerPayload,
+  firstUnansweredIndex,
+  normalizeStoredAnswers,
+  shouldAutoAdvance
+} from "./answer-state.mjs";
 
 const state = {
   screen: "welcome",
@@ -16,16 +22,28 @@ const modal = document.querySelector("#share-modal");
 const progressKey = "campus-persona-university-progress-v5.0.1";
 const letter = (index) => index < 26 ? String.fromCharCode(65 + index) : `${index + 1}`;
 const answerForCurrent = () => state.answers[state.bank?.questions[state.questionIndex]?.id];
-const safeProgress = () => ({ questionIndex: state.questionIndex, answers: state.answers, startTime: state.startTime });
+const safeProgress = () => ({
+  bankVersion: state.bank?.bank_version,
+  questionIndex: state.questionIndex,
+  answers: state.answers,
+  startTime: state.startTime
+});
 
 function restoreProgress() {
   try {
     const saved = JSON.parse(localStorage.getItem(progressKey) || "null");
-    if (saved && saved.answers && saved.questionIndex < state.bank.questions.length) {
-      state.questionIndex = saved.questionIndex;
-      state.answers = saved.answers;
-      state.startTime = saved.startTime || Date.now();
+    if (!saved || !saved.answers) return;
+    if (saved.bankVersion && saved.bankVersion !== state.bank.bank_version) {
+      clearProgress();
+      return;
     }
+    state.answers = normalizeStoredAnswers(state.bank.questions, saved.answers);
+    const firstMissing = firstUnansweredIndex(state.bank.questions, state.answers);
+    const savedIndex = Number.isInteger(saved.questionIndex)
+      ? Math.max(0, Math.min(saved.questionIndex, state.bank.questions.length - 1))
+      : 0;
+    state.questionIndex = firstMissing === -1 ? savedIndex : firstMissing;
+    state.startTime = Number.isFinite(saved.startTime) ? saved.startTime : Date.now();
   } catch { /* 浏览器缓存损坏时从头开始 */ }
 }
 
@@ -87,6 +105,7 @@ const screens = {
       <div class="progress-track"><div class="progress-value" style="width:${progress}%"></div></div>
       <p class="question-kicker">${question.emoji_type || "✦"} ${question.result_effect === "egg_only" ? "节奏破坏题 · 趣味彩蛋" : "日常魔法观测"}</p>
       <div class="question-card"><h2>${question.text}</h2><p>${question.result_effect === "egg_only" ? "这一题不影响主标签，答案会成为你的结果彩蛋。" : "先别想太久，第一反应往往最像你。"}</p></div>
+      ${state.error ? `<p class="quiz-error" role="alert">${state.error}</p>` : ""}
       <div class="options-list">${question.options.map((option, index) => `<button class="option-button ${selected === index ? "is-selected" : ""}" data-option="${index}"><span class="option-letter">${letter(index)}</span><span class="option-text">${option.text}</span></button>`).join("")}</div>
       <div class="quiz-footer"><button class="text-button" data-action="prev-question" ${state.questionIndex === 0 ? "disabled" : ""}>← 上一题</button><button class="primary-button mini-next" data-action="next-question">${state.questionIndex === state.bank.questions.length - 1 ? "查看结果" : "下一题 →"}</button></div>
     </section>`;
@@ -113,31 +132,50 @@ const screens = {
 };
 
 async function finishQuiz() {
-  state.screen = "analysis";
-  render();
-  const answers = state.bank.questions.map((question) => ({ qid: question.id, selected: state.answers[question.id] }));
-  const response = await submitQuiz({ version: "university", answers, duration_seconds: Math.round((Date.now() - state.startTime) / 1000) }, state.bank);
-  if (response.code !== 0) {
-    state.error = response.message || "结果计算失败";
+  let answers;
+  try {
+    answers = buildAnswerPayload(state.bank.questions, state.answers);
+  } catch (error) {
+    state.questionIndex = Number.isInteger(error.questionIndex) ? error.questionIndex : state.questionIndex;
+    state.error = error.message || "请完成全部题目后再查看结果";
     state.screen = "quiz";
+    saveProgress();
     render();
     return;
   }
-  state.result = response.data.server_result;
-  state.result.record_id = response.data.record_id;
-  state.screen = "result";
-  clearProgress();
+  state.error = null;
+  state.screen = "analysis";
   render();
+  try {
+    const response = await submitQuiz({ version: "university", answers, duration_seconds: Math.round((Date.now() - state.startTime) / 1000) });
+    if (response.code !== 0) {
+      state.error = response.message || "结果计算失败";
+      state.screen = "quiz";
+      render();
+      return;
+    }
+    state.result = response.data.server_result;
+    state.result.record_id = response.data.record_id;
+    state.screen = "result";
+    clearProgress();
+    render();
+  } catch (error) {
+    state.error = error.message || "结果计算失败";
+    state.screen = "quiz";
+    render();
+  }
 }
 
 function bindPageActions() {
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => handleAction(button.dataset.action)));
   document.querySelectorAll("[data-option]").forEach((button) => button.addEventListener("click", () => {
-    state.answers[state.bank.questions[state.questionIndex].id] = Number(button.dataset.option);
+    const answeredIndex = state.questionIndex;
+    state.answers[state.bank.questions[answeredIndex].id] = Number(button.dataset.option);
+    state.error = null;
     saveProgress();
     render();
     window.setTimeout(() => {
-      if (state.screen !== "quiz") return;
+      if (!shouldAutoAdvance(state.screen, state.questionIndex, answeredIndex)) return;
       if (state.questionIndex === state.bank.questions.length - 1) finishQuiz();
       else { state.questionIndex += 1; saveProgress(); render(); }
     }, 280);

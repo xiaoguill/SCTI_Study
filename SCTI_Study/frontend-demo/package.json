@@ -1,9 +1,11 @@
 {
   "name": "campus-persona-mini-program-demo",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "description": "校园人设测试微信小程序风格前端 demo",
   "scripts": {
-    "start": "python -m http.server 4173"
+    "start": "node dev-server.mjs",
+    "test": "node --test tests/answer-state.test.mjs tests/local-result.test.mjs"
   }
 }

@@ -1,4 +1,5 @@
 const PUBLIC_BANK_URL = "./data/university-bank.public.json";
+const RESULT_TIMEOUT_MS = 12000;
 let cachedBank = null;
 
 function hasWechatCloud() {
@@ -6,8 +7,21 @@ function hasWechatCloud() {
 }
 
 async function callWechatFunction(name, data) {
-  const response = await wx.cloud.callFunction({ name, data });
+  const response = await withTimeout(
+    wx.cloud.callFunction({ name, data }),
+    "云端计算超时，请检查网络后重试"
+  );
+  if (!response?.result) throw new Error("云端返回的数据不完整，请重试");
   return response.result;
+}
+
+function withTimeout(promise, message) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), RESULT_TIMEOUT_MS);
+    Promise.resolve(promise)
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer));
+  });
 }
 
 export async function getBank() {
@@ -24,47 +38,32 @@ export async function getBank() {
   return cachedBank;
 }
 
-function localDemoSubmit(data, bank) {
-  const q20 = data.answers.find((answer) => answer.qid === 20);
-  const tag = bank.tags[q20?.selected ?? 5] || bank.tags[5];
-  const eggs = [5, 8, 12, 19].flatMap((qid) => {
-    const answer = data.answers.find((item) => item.qid === qid);
-    const question = bank.questions.find((item) => item.id === qid);
-    const option = question?.options[answer?.selected ?? 0];
-    const mapping = bank.easter_eggs.find((item) => item.source_qid === qid)?.option_mapping[answer?.selected ?? 0];
-    return mapping ? [{ qid, value: mapping.desc || option?.text || "" }] : [];
-  });
-  const userVector = tag.dimensions || [3, 3, 3, 3];
-  return {
-    code: 0,
-    message: "local demo",
-    data: {
-      record_id: "local-demo-record",
-      server_result: {
-        tag_id: tag.id,
-        tag_name: tag.name,
-        tag_short_desc: tag.short_desc,
-        tag_full_desc: tag.full_desc,
-        keywords: tag.keywords,
-        match_method: "local_demo",
-        scores_ranking: [],
-        dimensions: {
-          labels: Object.values(bank.dimension_config),
-          user_vector: userVector,
-          target_vector: tag.dimensions,
-          manhattan_distance: 0
-        },
-        easter_eggs: eggs
-      },
-      match_confirmed: false,
-      tag_stats: { total_tested: 0, this_tag_count: 0, this_tag_percentage: 0 }
-    }
-  };
+async function localDemoSubmit(data) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RESULT_TIMEOUT_MS);
+  try {
+    const response = await fetch("./api/submit-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      signal: controller.signal
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.message || "本地结果计算失败");
+    return payload;
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("本地结果服务超时，请重试");
+    if (error instanceof TypeError) throw new Error("本地结果服务不可用，请运行 npm start 后重试");
+    if (error.message) throw error;
+    throw new Error("本地结果服务不可用，请运行 npm start 后重试");
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-export async function submitQuiz(data, bank) {
+export async function submitQuiz(data) {
   if (hasWechatCloud()) return callWechatFunction("submit-quiz", data);
-  return localDemoSubmit(data, bank);
+  return localDemoSubmit(data);
 }
 
 export async function recordShare(data) {

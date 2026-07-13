@@ -1,0 +1,163 @@
+{
+  "version": "5.0.0",
+  "policy": "完整核心签名必须唯一；原文明确写出的修正优先于同一单元格中被替换的旧引用。",
+  "source_gaps": [
+    "高中版与硕博版未提供大学版附录 A 式独立权重表；本编译器直接提取题目选项中的 0/1/2 映射，不把未声明信号补造成权重。",
+    "高中版与硕博版未提供逐标签结果页与分享文案；按标签表的一句话描述和核心画像补齐，并通过统一字数校验。"
+  ],
+  "revisions": [
+    {
+      "bank": "high_school",
+      "tag_id": "H3",
+      "source_cell": 2,
+      "before": [
+        {
+          "qid": 6,
+          "option_id": "D"
+        }
+      ],
+      "after": [
+        {
+          "qid": 3,
+          "option_id": "A"
+        }
+      ],
+      "reason": "原始核心题表明确标注修正；采用修正后的题目以消除错误信号。"
+    },
+    {
+      "bank": "high_school",
+      "tag_id": "H14",
+      "source_cell": 2,
+      "before": [
+        {
+          "qid": 10,
+          "option_id": "A"
+        }
+      ],
+      "after": [
+        {
+          "qid": 17,
+          "option_id": "B"
+        }
+      ],
+      "reason": "原始核心题表明确标注修正；采用修正后的题目以消除错误信号。"
+    },
+    {
+      "bank": "high_school",
+      "tag_id": "H2",
+      "before": [
+        {
+          "qid": 1,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 10,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 18,
+          "option_id": "B",
+          "answer_index": 1
+        }
+      ],
+      "after": [
+        {
+          "qid": 1,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 10,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 20,
+          "option_id": "B",
+          "answer_index": 1
+        }
+      ],
+      "reason": "该标签没有 Q20 的唯一自我写照信号，可能与其他标签在同一完整答题中同时精确命中；用对应标签的 Q20 选项替换最后一个核心题以保证精确匹配互斥。"
+    },
+    {
+      "bank": "graduate",
+      "tag_id": "G13",
+      "before": [
+        {
+          "qid": 3,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 7,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 17,
+          "option_id": "B",
+          "answer_index": 1
+        }
+      ],
+      "after": [
+        {
+          "qid": 3,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 7,
+          "option_id": "B",
+          "answer_index": 1
+        },
+        {
+          "qid": 20,
+          "option_id": "M",
+          "answer_index": 12
+        }
+      ],
+      "reason": "该标签没有 Q20 的唯一自我写照信号，可能与其他标签在同一完整答题中同时精确命中；用对应标签的 Q20 选项替换最后一个核心题以保证精确匹配互斥。"
+    },
+    {
+      "bank": "graduate",
+      "tag_id": "G15",
+      "before": [
+        {
+          "qid": 3,
+          "option_id": "C",
+          "answer_index": 2
+        },
+        {
+          "qid": 7,
+          "option_id": "C",
+          "answer_index": 2
+        },
+        {
+          "qid": 17,
+          "option_id": "C",
+          "answer_index": 2
+        }
+      ],
+      "after": [
+        {
+          "qid": 3,
+          "option_id": "C",
+          "answer_index": 2
+        },
+        {
+          "qid": 7,
+          "option_id": "C",
+          "answer_index": 2
+        },
+        {
+          "qid": 20,
+          "option_id": "O",
+          "answer_index": 14
+        }
+      ],
+      "reason": "该标签没有 Q20 的唯一自我写照信号，可能与其他标签在同一完整答题中同时精确命中；用对应标签的 Q20 选项替换最后一个核心题以保证精确匹配互斥。"
+    }
+  ]
+}

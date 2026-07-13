@@ -4,7 +4,9 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
+    "compile:banks": "node ../scripts/compile-question-banks.mjs",
+    "validate:banks": "node ../scripts/validate-question-banks.mjs",
     "build:bank": "node scripts/build-university-bank.mjs",
-    "test": "node --test tests/algorithm.test.js"
+    "test": "node --test tests/algorithm.test.js ../tests/question-banks.test.js"
   }
 }

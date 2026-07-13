@@ -19,6 +19,14 @@ test("U13 uses corrected core questions Q2 + Q7 + Q20", () => {
   assert.equal(result.match_method, "core");
 });
 
+test("Q20 alone cannot determine a campus persona", () => {
+  const q20Only = calculateResult(answers({ 20: 5 }), bank);
+  const u6Core = calculateResult(answers({ 2: 1, 16: 3, 20: 5 }), bank);
+  assert.equal(q20Only.match_method, "dimension");
+  assert.equal(u6Core.tag_id, "U6");
+  assert.notEqual(q20Only.tag_id, u6Core.tag_id);
+});
+
 test("second layer requires a three-point lead", () => {
   const smallBank = {
     tags: [

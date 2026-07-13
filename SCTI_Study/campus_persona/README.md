@@ -28,6 +28,16 @@ campus_persona/
 
 ## 重新生成题库产物
 
+题库权威来源在工作区根目录的 `data/banks/*.v5.0.0.json`。先从三份 Markdown 规格编译，再校验三套题库，最后生成大学版的私有和公开部署产物：
+
+```powershell
+node ../scripts/compile-question-banks.mjs
+npm run validate:banks
+npm run build:bank
+```
+
+`get-bank` 和 `frontend-demo` 只使用不含 `scores` 与 `core_questions` 的公开题库；`submit-quiz` 使用私有题库。
+
 题库源定义位于 `scripts/build-university-bank.mjs`，执行：
 
 ```powershell

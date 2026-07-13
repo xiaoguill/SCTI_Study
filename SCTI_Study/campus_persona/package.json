@@ -1,0 +1,10 @@
+{
+  "name": "campus-persona-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build:bank": "node scripts/build-university-bank.mjs",
+    "test": "node --test tests/algorithm.test.js"
+  }
+}

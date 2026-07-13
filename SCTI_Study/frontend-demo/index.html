@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fffdf3" />
+    <title>校园人设测试 · 小程序 Demo</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="prototype-shell">
+      <section class="prototype-intro" aria-label="Demo 说明">
+        <span class="eyebrow">WECHAT MINI PROGRAM DEMO</span>
+        <h1>校园人设测试</h1>
+        <p>一套可复用的校园手绘风小程序页面原型。点击手机里的按钮体验完整流程。</p>
+        <div class="screen-switcher" role="tablist" aria-label="切换页面">
+          <button class="screen-tab is-active" data-screen="welcome" role="tab">欢迎</button>
+          <button class="screen-tab" data-screen="identity" role="tab">身份</button>
+          <button class="screen-tab" data-screen="quiz" role="tab">答题</button>
+          <button class="screen-tab" data-screen="result" role="tab">结果</button>
+        </div>
+        <div class="design-notes">
+          <div><span class="note-dot mint"></span><span>奶油纸张背景</span></div>
+          <div><span class="note-dot pink"></span><span>马卡龙主题色</span></div>
+          <div><span class="note-dot ink"></span><span>粗黑描边组件</span></div>
+        </div>
+      </section>
+
+      <section class="phone-wrap" aria-label="微信小程序预览">
+        <div class="phone-device">
+          <div class="phone-speaker"></div>
+          <div class="mini-app">
+            <div class="status-bar"><span>9:41</span><span>▮▮▮ ◔ ▰</span></div>
+            <div id="app" class="app-content"></div>
+            <div class="home-indicator"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="share-modal" class="modal-backdrop" hidden>
+      <div class="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-title">
+        <button class="modal-close" data-action="close-modal" aria-label="关闭">×</button>
+        <span class="result-kicker">分享卡片预览</span>
+        <div class="share-poster">
+          <div class="poster-sparkle">✦</div>
+          <div class="poster-avatar avatar-mint">☁</div>
+          <span>我的校园隐藏人设是</span>
+          <strong>校园人设</strong>
+          <small>#大学版 #校园人设测试 #你是哪一种</small>
+          <div class="poster-code">小程序码</div>
+        </div>
+        <h2 id="share-title">生成我的校园人设卡</h2>
+        <p>Demo 里先展示海报结构，正式版可替换为 Canvas 生成图片。</p>
+        <button class="primary-button full-width" data-action="close-modal">知道啦</button>
+      </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

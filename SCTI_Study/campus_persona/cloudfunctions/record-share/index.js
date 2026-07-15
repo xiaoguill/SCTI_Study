@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const cloud = require("wx-server-sdk");
+const { normalizeShareRequest } = require("./share-input");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
@@ -13,8 +14,13 @@ function identityHash(platform) {
 
 exports.main = async (event = {}) => {
   try {
-    const { record_id: recordId, share_type: shareType = "forward", tag_id: tagId, share_platform: sharePlatform = "wechat" } = event;
-    if (!recordId || !["forward", "timeline"].includes(shareType)) return { code: 400, message: "分享参数错误", data: null };
+    let request;
+    try {
+      request = normalizeShareRequest(event);
+    } catch {
+      return { code: 400, message: "分享参数错误", data: null };
+    }
+    const { recordId, shareType, sharePlatform } = request;
     const providerSubjectHash = identityHash(sharePlatform);
     const user = await db.collection("users").where({ provider_subject_hash: providerSubjectHash, platform: sharePlatform }).limit(1).get();
     if (!user.data.length) return { code: 401, message: "请先登录", data: null };
@@ -25,7 +31,7 @@ exports.main = async (event = {}) => {
       quiz_record_id: recordId,
       share_type: shareType,
       share_platform: sharePlatform,
-      tag_id: tagId || record.data[0].result.tag_id,
+      tag_id: record.data[0].result.tag_id,
       created_at: new Date()
     } });
     return { code: 0, message: "success", data: { share_record_id: result._id } };

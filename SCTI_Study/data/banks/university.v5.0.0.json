@@ -2,6 +2,7 @@
   "$schema": "../../schemas/question-bank.schema.json",
   "version": "university",
   "bank_version": "5.0.0",
+  "algorithm_profile": "three-layer.v2.0.0",
   "status": "active",
   "dimension_config": {
     "labels": [
@@ -2014,7 +2015,7 @@
       "id": 20,
       "text": "最后一题——下面哪句话最像你的大学写照？",
       "type": "normal",
-      "result_effect": "scored",
+      "result_effect": "self_perception_only",
       "emoji_type": "🟢",
       "options": [
         {

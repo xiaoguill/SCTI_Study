@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.codex/
+memory_data/
+knowledge_base/
+project.config.json
+project.private.config.json
+**/node_modules/
+**/__pycache__/
+**/.cache/
+*.db
+*.sqlite
+*.sqlite3

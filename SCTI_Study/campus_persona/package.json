@@ -6,7 +6,8 @@
   "scripts": {
     "compile:banks": "node ../scripts/compile-question-banks.mjs",
     "validate:banks": "node ../scripts/validate-question-banks.mjs",
-    "build:bank": "node scripts/build-university-bank.mjs",
-    "test": "node --test tests/algorithm.test.js ../tests/question-banks.test.js"
+    "build:banks": "node scripts/build-question-banks.mjs",
+    "build:bank": "npm run build:banks",
+    "test": "node --test tests/*.test.js ../tests/question-banks.test.js"
   }
 }

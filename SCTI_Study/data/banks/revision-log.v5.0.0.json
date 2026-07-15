@@ -158,6 +158,20 @@
         }
       ],
       "reason": "该标签没有 Q20 的唯一自我写照信号，可能与其他标签在同一完整答题中同时精确命中；用对应标签的 Q20 选项替换最后一个核心题以保证精确匹配互斥。"
+    },
+    {
+      "date": "2026-07-13",
+      "banks": ["high_school", "university", "graduate"],
+      "question_id": 20,
+      "before": {
+        "result_effect": "scored",
+        "decision_layers": ["core", "score", "dimension"]
+      },
+      "after": {
+        "result_effect": "self_perception_only",
+        "decision_layers": []
+      },
+      "reason": "Q20 由 three-layer.v2.0.0 算法配置排除出核心、分数和维度决策，仅保留为自我感知信号。"
     }
   ]
 }

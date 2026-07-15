@@ -1,26 +1,24 @@
-# 校园人设测试 · 微信小程序风格 Demo
+# 校园人设测试 · 三版本浏览器验收客户端
 
-这是 V5.0 MVP 的前端规格验收 Demo，用浏览器模拟微信小程序的手机画布。当前只开放大学版，题库从 `data/university-bank.public.json` 加载；在真实微信小程序运行时，前端会优先调用 CloudBase 云函数。
-
-它包含：
-
-- 欢迎页：产品入口、插画占位、测试信息
-- 身份选择页：大学生（高中版、硕博版留待后续版本）
-- 答题页：进度条、选项选中态、自动切题、返回上一题
-- 结果页：人设主卡片、四维度可视化、关键词、分享卡片弹层
+`frontend-demo` 用原生 HTML、CSS 和 JavaScript 模拟手机画布，验证高中版、大学版、硕博版共用的选身份、欢迎、答题、分析、结果与分享流程。身份卡、主题、题库路径和版本文案都来自生成的版本注册表，不在前端业务代码中维护版本分支。
 
 ## 本地运行
 
-在 `frontend-demo` 目录执行：
-
 ```powershell
+cd E:\SCTI_Study\frontend-demo
 npm start
 ```
 
-然后打开 <http://localhost:4173>。
+然后打开 <http://localhost:4173>。浏览器环境没有 `wx.cloud` 时会调用本地结果服务；它复用 `submit-quiz` 的判定模块与统一结果协议。
 
-## 说明
+## 数据与维护边界
 
-当前 demo 使用纯 HTML / CSS / JavaScript，便于先确认页面规格和交互节奏。浏览器环境会使用明确标注的本地演示回包；微信小程序环境通过 `frontend-demo/api/cloud.js` 调用 `get-bank`、`user-login`、`submit-quiz` 和 `record-share` 云函数。
+`data/runtime-registry.json` 和 `data/*.public.json` 都是从根目录的 `data/quiz-versions.v1.json`、`data/banks/*.json` 与 `data/algorithms/*.json` 构建出的公开产物，绝不能手工编辑。公开产物不包含评分权重、核心题映射或私有算法阈值。
 
-三层算法、私有权重和最终结果在 `campus_persona/cloudfunctions/submit-quiz/` 维护，浏览器只拿公开题目和结果文案，不接收评分权重。
+正常的题目/文案更新、算法 profile 调整和身份版本新增只修改根目录规范数据，随后运行 `campus_persona` 的 `npm run build:banks`；不需要修改前端业务代码。完整命令见 [后端与题库 README](../campus_persona/README.md)。
+
+## 生产边界
+
+这是 browser acceptance client，NOT native WXML/WXSS。原生小程序适配、真机/体验版测试、平台审核和正式发布是单独的生产阶段。真实微信运行时可以调用 `get-bank`、`user-login`、`submit-quiz` 与 `record-share`，但当前浏览器交付不表示 CloudBase 已部署，也不表示原生客户端已经上传。
+
+本次代码交接不需要 AppSecret。任何 AppID、CloudBase 环境 ID、密钥、用户身份或带凭据端点都不得写入仓库或日志。

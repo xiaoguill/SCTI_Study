@@ -25,7 +25,8 @@ exports.main = async (event = {}) => {
     const created = await users.add({ data: {
       provider_subject_hash: providerSubjectHash,
       platform,
-      identity_type: "university",
+      identity_type: null,
+      last_identity_type: null,
       last_test_tag: null,
       test_count: 0,
       created_at: now,

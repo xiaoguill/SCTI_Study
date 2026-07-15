@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>论文纺织工 · 结果页 Demo</title>
+    <link rel="stylesheet" href="./result-demo.css" />
+  </head>
+  <body>
+    <div class="phone-demo">
+      <header class="status-bar" aria-label="状态栏">
+        <span>9:41</span>
+        <span class="status-icons">▮ ▮ ▮ ◉ ▰</span>
+      </header>
+
+      <main class="result-scroll">
+        <nav class="mini-header" aria-label="页面导航">
+          <button class="circle-button" aria-label="返回">←</button>
+          <strong>硕博版 · 测试完成</strong>
+          <button class="circle-button" aria-label="关闭">×</button>
+        </nav>
+
+        <p class="result-kicker">✦ 你的校园隐藏人设是</p>
+
+        <section class="hero-card" aria-labelledby="persona-title">
+          <div class="hero-art-wrap">
+            <img
+              src="./assets/paper-weaver-abstract.png"
+              alt="论文纺织工：抽象低多边形人物在论文织机前持续输出"
+              class="hero-art"
+            />
+            <span class="hero-sparkle" aria-hidden="true">✦</span>
+          </div>
+          <div class="hero-copy">
+            <p class="eyebrow">G1 · 硕博版 SBTI 性格标签</p>
+            <h1 id="persona-title">论文纺织工</h1>
+            <p class="hero-desc">你的手指和键盘长在了一起，论文像布匹一样持续外吐。</p>
+            <div class="tag-row" aria-label="人设关键词">
+              <span>高产</span>
+              <span>专注</span>
+              <span>持续输出</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-card">
+          <h2>完整人设解读</h2>
+          <p>你是学术世界的纺织工，键盘是你的织机，文献和公式是你的经纬线。</p>
+          <p>你擅长把复杂的想法拆开、整理，再一段一段织成严谨的论文。别人还在找参考文献时，你已经打开了下一版文档。</p>
+          <p>你可能会熬夜改稿、反复调整细节，但这份持续输出的能力，正是你最可靠的学术底色。</p>
+        </section>
+
+        <section class="content-card">
+          <h2>你的四维度轨迹</h2>
+          <div class="dimension-list">
+            <div class="dimension"><span>学业投入度</span><i><b style="width: 78%"></b></i><strong>3.90</strong></div>
+            <div class="dimension"><span>社交活跃度</span><i><b style="width: 36%"></b></i><strong>1.82</strong></div>
+            <div class="dimension"><span>自律执行力</span><i><b style="width: 72%"></b></i><strong>3.61</strong></div>
+            <div class="dimension"><span>探索开放性</span><i><b style="width: 64%"></b></i><strong>3.18</strong></div>
+          </div>
+          <small>score · 结果展示 Demo</small>
+        </section>
+
+        <section class="content-card">
+          <h2>你的直觉自我认知</h2>
+          <p>如果导师突然问你“这周能不能出初稿”，你大概率会打开电脑，先说一句“我已经有一个版本了”。</p>
+          <small>Q20 · 这道题只用于生成你的校园人设</small>
+        </section>
+
+        <section class="content-card">
+          <h2>趣味彩蛋</h2>
+          <div class="egg-row"><b>5 · 趣味彩蛋</b><span>深夜实验室的最后一盏灯</span></div>
+          <div class="egg-row"><b>8 · 趣味彩蛋</b><span>电脑里永远开着 30+ 个文档</span></div>
+          <div class="egg-row"><b>12 · 趣味彩蛋</b><span>参考文献管理软件是你的本体</span></div>
+          <div class="egg-row"><b>19 · 趣味彩蛋</b><span>你织的不是论文，是通往毕业的经纬线</span></div>
+        </section>
+
+        <section class="share-card">
+          <h2>分享文案</h2>
+          <p>我测出的是「论文纺织工」：一字一句，织出思考的经纬；一版一版，缝合学术的远方。快来看看你的校园人设！</p>
+        </section>
+
+        <button class="share-button" id="shareButton">分享我的校园人设</button>
+        <p class="share-hint" id="shareHint" role="status" aria-live="polite"></p>
+      </main>
+
+      <div class="home-indicator" aria-hidden="true"></div>
+    </div>
+
+    <script>
+      const shareButton = document.querySelector('#shareButton');
+      const shareHint = document.querySelector('#shareHint');
+      const shareText = '我测出的是「论文纺织工」：一字一句，织出思考的经纬；一版一版，缝合学术的远方。';
+
+      shareButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(shareText);
+          shareHint.textContent = '分享文案已复制，可以发给朋友了';
+        } catch {
+          shareHint.textContent = shareText;
+        }
+      });
+    </script>
+  </body>
+</html>

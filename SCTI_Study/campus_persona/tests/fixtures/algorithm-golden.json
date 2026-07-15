@@ -1,0 +1,5 @@
+{
+  "university": { "overrides": { "1": 3, "3": 2, "7": 1, "12": 3, "18": 2 }, "tag_id": "U1", "match_method": "core" },
+  "high_school": { "overrides": {}, "tag_id": "H1", "match_method": "score" },
+  "graduate": { "overrides": {}, "tag_id": "G12", "match_method": "score" }
+}

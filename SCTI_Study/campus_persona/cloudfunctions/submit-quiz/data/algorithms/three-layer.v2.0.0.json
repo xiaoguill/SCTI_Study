@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schemas/algorithm-profile.schema.json",
+  "id": "three-layer.v2.0.0",
+  "strategy": "three_layer",
+  "scored_effect": "scored",
+  "main_result": {
+    "excluded_question_ids": [
+      20
+    ]
+  },
+  "core": {
+    "minimum_projected_questions": 2,
+    "require_unique_match": true,
+    "max_score_gap_from_leader": 2
+  },
+  "score": {
+    "minimum_lead": 3
+  },
+  "dimension": {
+    "metric": "manhattan",
+    "precision": 2,
+    "candidate_score_gap": 2
+  },
+  "self_perception": {
+    "question_id": 20,
+    "role": "self_perception_only"
+  }
+}

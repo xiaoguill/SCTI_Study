@@ -6,6 +6,6 @@
   "description": "校园人设测试微信小程序风格前端 demo",
   "scripts": {
     "start": "node dev-server.mjs",
-    "test": "node --test tests/answer-state.test.mjs tests/local-result.test.mjs"
+    "test": "node --test tests/*.test.mjs"
   }
 }

@@ -1,0 +1,58 @@
+{
+  "$schema": "../schemas/quiz-version-registry.schema.json",
+  "schema_version": "1.0.0",
+  "default_version": "university",
+  "versions": [
+    {
+      "id": "high_school",
+      "enabled": true,
+      "order": 1,
+      "bank_version": "5.0.0",
+      "tag_prefix": "H",
+      "title": "高中版",
+      "identity_name": "高中生",
+      "identity_desc": "高中阶段 · 20 道校园场景题",
+      "icon": "📚",
+      "quiz_label": "高中版 · V5.0.0",
+      "welcome_label": "高中版 · 趣味校园人格测试",
+      "welcome_copy": "看看你在高中校园里藏着哪一种独特人设。",
+      "cache_namespace": "campus-persona-high-school",
+      "public_bank_file": "high_school.v5.0.0.public.json",
+      "theme": { "accent": "#86dfbf", "accent_light": "#ddf8eb", "card": "#fff0a8" }
+    },
+    {
+      "id": "university",
+      "enabled": true,
+      "order": 2,
+      "bank_version": "5.0.0",
+      "tag_prefix": "U",
+      "title": "大学版",
+      "identity_name": "大学生",
+      "identity_desc": "本科 / 专科阶段 · 20 道大学场景题",
+      "icon": "🎓",
+      "quiz_label": "大学版 · V5.0.0",
+      "welcome_label": "大学版 · 趣味校园人格测试",
+      "welcome_copy": "看看你在大学校园里藏着哪一种独特人设。",
+      "cache_namespace": "campus-persona-university",
+      "public_bank_file": "university.v5.0.0.public.json",
+      "theme": { "accent": "#f3a8c2", "accent_light": "#fde3ed", "card": "#fff0a8" }
+    },
+    {
+      "id": "graduate",
+      "enabled": true,
+      "order": 3,
+      "bank_version": "5.0.0",
+      "tag_prefix": "G",
+      "title": "硕博版",
+      "identity_name": "硕博生",
+      "identity_desc": "硕士 / 博士阶段 · 20 道科研场景题",
+      "icon": "🔬",
+      "quiz_label": "硕博版 · V5.0.0",
+      "welcome_label": "硕博版 · 趣味校园人格测试",
+      "welcome_copy": "看看你在科研生活里藏着哪一种独特人设。",
+      "cache_namespace": "campus-persona-graduate",
+      "public_bank_file": "graduate.v5.0.0.public.json",
+      "theme": { "accent": "#cdb6f6", "accent_light": "#eee5ff", "card": "#fff0a8" }
+    }
+  ]
+}

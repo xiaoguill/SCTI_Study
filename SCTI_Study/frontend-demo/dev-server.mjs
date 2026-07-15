@@ -5,7 +5,7 @@ import path from "node:path";
 import { calculateLocalResult } from "./local-result.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const port = Number(process.env.PORT || 4173);
+const defaultPort = Number(process.env.PORT || 4175);
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -16,7 +16,10 @@ const mimeTypes = {
 };
 
 function sendJson(response, status, body) {
-  response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+  response.writeHead(status, {
+    "Access-Control-Allow-Origin": "*",
+    "Content-Type": "application/json; charset=utf-8"
+  });
   response.end(JSON.stringify(body));
 }
 
@@ -44,7 +47,21 @@ function sendStatic(request, response) {
   }
 }
 
-const server = createServer((request, response) => {
+export function createDemoServer() {
+  return createServer((request, response) => {
+  if (request.method === "GET" && request.url === "/api/health") {
+    sendJson(response, 200, { code: 0, data: { mode: "local" } });
+    return;
+  }
+  if (request.method === "OPTIONS" && request.url === "/api/submit-quiz") {
+    response.writeHead(204, {
+      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Origin": "*"
+    });
+    response.end();
+    return;
+  }
   if (request.method === "POST" && request.url === "/api/submit-quiz") {
     let body = "";
     request.setEncoding("utf8");
@@ -59,8 +76,17 @@ const server = createServer((request, response) => {
     return;
   }
   sendStatic(request, response);
-});
+  });
+}
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`Campus Persona demo: http://127.0.0.1:${port}`);
-});
+export function startDemoServer({ port = defaultPort } = {}) {
+  const server = createDemoServer();
+  server.listen(port, "127.0.0.1", () => {
+    console.log(`Campus Persona demo: http://127.0.0.1:${port}`);
+  });
+  return server;
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  startDemoServer();
+}

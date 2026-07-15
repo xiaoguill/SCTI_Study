@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Campus Persona Algorithm Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "id", "strategy", "scored_effect", "main_result", "core", "score", "dimension", "self_perception"],
+  "properties": {
+    "$schema": { "const": "../../schemas/algorithm-profile.schema.json" },
+    "id": { "type": "string", "pattern": "^three-layer\\.v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "strategy": { "const": "three_layer" },
+    "scored_effect": { "const": "scored" },
+    "main_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["excluded_question_ids"],
+      "properties": {
+        "excluded_question_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "contains": { "const": 20 },
+          "items": { "type": "integer", "minimum": 1, "maximum": 20 }
+        }
+      }
+    },
+    "core": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_projected_questions", "require_unique_match", "max_score_gap_from_leader"],
+      "properties": {
+        "minimum_projected_questions": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "require_unique_match": { "type": "boolean" },
+        "max_score_gap_from_leader": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_lead"],
+      "properties": { "minimum_lead": { "type": "integer", "minimum": 1 } }
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "precision", "candidate_score_gap"],
+      "properties": {
+        "metric": { "const": "manhattan" },
+        "precision": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "candidate_score_gap": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "self_perception": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question_id", "role"],
+      "properties": {
+        "question_id": { "const": 20 },
+        "role": { "const": "self_perception_only" }
+      }
+    }
+  }
+}

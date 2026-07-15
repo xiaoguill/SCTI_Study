@@ -2,17 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Campus Persona Question Bank V5",
   "type": "object",
-  "required": ["version", "bank_version", "dimension_config", "tags", "questions", "easter_eggs"],
+  "required": ["version", "bank_version", "algorithm_profile", "dimension_config", "tags", "questions", "easter_eggs"],
   "$defs": {
     "dimensions": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 1, "maximum": 5 } },
     "coreQuestion": { "type": "object", "required": ["qid", "option_id"], "properties": { "qid": { "type": "integer", "minimum": 1, "maximum": 20 }, "option_id": { "pattern": "^[A-P]$" } } },
-    "tag": { "type": "object", "required": ["id", "name", "short_desc", "dimensions", "core_questions", "full_desc", "share_copy"], "properties": { "id": { "pattern": "^[UHG](?:[1-9]|1[0-6])$" }, "name": { "type": "string", "minLength": 1 }, "dimensions": { "$ref": "#/$defs/dimensions" }, "core_questions": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/coreQuestion" } }, "full_desc": { "type": "object", "required": ["paragraph_1", "paragraph_2", "paragraph_3"] }, "share_copy": { "type": "string", "minLength": 16, "maxLength": 100 } } },
+    "tag": { "type": "object", "required": ["id", "name", "short_desc", "dimensions", "core_questions", "full_desc", "share_copy"], "properties": { "id": { "pattern": "^[A-Z][A-Z0-9]{0,7}(?:[1-9]|1[0-6])$" }, "name": { "type": "string", "minLength": 1 }, "dimensions": { "$ref": "#/$defs/dimensions" }, "core_questions": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/coreQuestion" } }, "full_desc": { "type": "object", "required": ["paragraph_1", "paragraph_2", "paragraph_3"] }, "share_copy": { "type": "string", "minLength": 16, "maxLength": 100 } } },
     "option": { "type": "object", "required": ["id", "index", "text", "scores", "dimensions"], "properties": { "id": { "pattern": "^[A-P]$" }, "index": { "type": "integer", "minimum": 0, "maximum": 15 }, "text": { "type": "string", "minLength": 1 }, "scores": { "type": "object", "additionalProperties": { "enum": [0, 1, 2] } }, "dimensions": { "$ref": "#/$defs/dimensions" }, "easter_egg": { "type": "string", "minLength": 1 } } },
-    "question": { "type": "object", "required": ["id", "text", "type", "result_effect", "options"], "properties": { "id": { "type": "integer", "minimum": 1, "maximum": 20 }, "text": { "type": "string", "minLength": 1 }, "result_effect": { "enum": ["scored", "egg_only"] }, "options": { "type": "array", "minItems": 4, "maxItems": 16, "items": { "$ref": "#/$defs/option" } } } }
+    "question": { "type": "object", "required": ["id", "text", "type", "result_effect", "options"], "properties": { "id": { "type": "integer", "minimum": 1, "maximum": 20 }, "text": { "type": "string", "minLength": 1 }, "result_effect": { "enum": ["scored", "egg_only", "self_perception_only"] }, "options": { "type": "array", "minItems": 4, "maxItems": 16, "items": { "$ref": "#/$defs/option" } } } }
   },
   "properties": {
-    "version": { "enum": ["university", "high_school", "graduate"] },
-    "bank_version": { "const": "5.0.0" },
+    "version": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" },
+    "bank_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "algorithm_profile": { "type": "string", "pattern": "^three-layer\\.v[0-9]+\\.[0-9]+\\.[0-9]+$" },
     "dimension_config": { "type": "object", "required": ["labels"] },
     "tags": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "$ref": "#/$defs/tag" } },
     "questions": { "type": "array", "minItems": 20, "maxItems": 20, "items": { "$ref": "#/$defs/question" } },

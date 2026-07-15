@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#fffdf3" />
-    <title>校园人设测试 · 小程序 Demo</title>
+    <title>校园人设测试 · Demo</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -12,12 +12,12 @@
       <section class="prototype-intro" aria-label="Demo 说明">
         <span class="eyebrow">WECHAT MINI PROGRAM DEMO</span>
         <h1>校园人设测试</h1>
-        <p>一套可复用的校园手绘风小程序页面原型。点击手机里的按钮体验完整流程。</p>
+        <p>一套共享校园手绘视觉的小程序原型。选择当前身份，体验对应完整流程。</p>
         <div class="screen-switcher" role="tablist" aria-label="切换页面">
           <button class="screen-tab is-active" data-screen="welcome" role="tab">欢迎</button>
           <button class="screen-tab" data-screen="identity" role="tab">身份</button>
           <button class="screen-tab" data-screen="quiz" role="tab">答题</button>
-          <button class="screen-tab" data-screen="result" role="tab">结果</button>
+          <button class="screen-tab" data-screen="result" role="tab" hidden>结果</button>
         </div>
         <div class="design-notes">
           <div><span class="note-dot mint"></span><span>奶油纸张背景</span></div>
@@ -45,12 +45,14 @@
         <div class="share-poster">
           <div class="poster-sparkle">✦</div>
           <div class="poster-avatar avatar-mint">☁</div>
-          <span>我的校园隐藏人设是</span>
-          <strong>校园人设</strong>
-          <small>#大学版 #校园人设测试 #你是哪一种</small>
+          <span data-share-version>校园版</span>
+          <strong data-share-tag>校园人设</strong>
+          <p data-share-copy>完成测试后生成专属分享文案。</p>
+          <small data-share-hashtags>#校园人设测试</small>
           <div class="poster-code">小程序码</div>
         </div>
         <h2 id="share-title">生成我的校园人设卡</h2>
+        <p class="share-feedback" data-share-feedback role="status" hidden></p>
         <p>Demo 里先展示海报结构，正式版可替换为 Canvas 生成图片。</p>
         <button class="primary-button full-width" data-action="close-modal">知道啦</button>
       </div>

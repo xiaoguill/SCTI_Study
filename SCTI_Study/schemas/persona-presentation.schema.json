@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "persona-presentation.schema.json",
+  "title": "Campus persona presentation configuration",
+  "type": "object",
+  "required": ["version", "default", "tags"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "default": { "$ref": "#/$defs/completePresentation" },
+    "tags": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*:[A-Z][A-Z0-9]{0,7}$" },
+      "additionalProperties": { "$ref": "#/$defs/presentationOverride" }
+    }
+  },
+  "$defs": {
+    "completePresentation": {
+      "$ref": "#/$defs/presentationOverride",
+      "required": [
+        "character_image",
+        "character_alt",
+        "character_position",
+        "character_scale",
+        "hero_background",
+        "decorations",
+        "visual_brief",
+        "asset_status",
+        "poster"
+      ],
+      "properties": { "poster": { "$ref": "#/$defs/completePoster" } }
+    },
+    "presentationOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "character_image": {
+          "type": "string",
+          "pattern": "^(?:|/assets/personas/[A-Za-z0-9][A-Za-z0-9_-]*(?:/[A-Za-z0-9][A-Za-z0-9_-]*)*\\.(?:png|webp))$"
+        },
+        "character_alt": { "type": "string" },
+        "character_position": {
+          "type": "string",
+          "enum": ["center_bottom", "center", "left_bottom", "right_bottom"]
+        },
+        "character_scale": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
+        "hero_background": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "decorations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "enum": ["star", "sparkle", "leaf"] }
+        },
+        "visual_brief": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "asset_status": { "type": "string", "enum": ["placeholder", "draft", "approved"] },
+        "poster": { "$ref": "#/$defs/posterOverride" }
+      }
+    },
+    "completePoster": {
+      "$ref": "#/$defs/posterOverride",
+      "required": ["template_key", "character_position", "safe_area"]
+    },
+    "posterOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "template_key": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "character_position": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "enum": ["center_bottom", "center", "left_bottom", "right_bottom"]
+        },
+        "safe_area": { "type": "string", "enum": ["center", "inset"], "pattern": "\\S" }
+      }
+    }
+  }
+}

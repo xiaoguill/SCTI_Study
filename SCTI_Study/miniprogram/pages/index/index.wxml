@@ -1,0 +1,115 @@
+<view class="page-shell" style="{{themeStyle}}">
+  <scroll-view wx:if="{{screen === 'welcome'}}" class="screen page welcome-screen" scroll-y>
+    <view>
+      <view class="welcome-top">
+        <view class="brand-mark"><text class="brand-icon">✦</text><text>校园人设实验室</text></view>
+        <text class="mini-version">{{versionTitles}}</text>
+      </view>
+      <view class="welcome-copy">
+        <text class="section-label">{{activeVersion.welcome_label}}</text>
+        <view class="hero-title"><text class="title-line">测测你是哪种</text><text class="title-line scribble">校园人设？</text></view>
+        <text class="hero-subtitle">{{activeVersion.welcome_copy}}</text>
+      </view>
+      <view class="campus-art" aria-hidden="true">
+        <text class="art-spark spark-one">✦</text><text class="art-spark spark-two">✧</text>
+        <view class="art-tree"><view class="art-trunk"></view></view><view class="art-ground"></view>
+        <view class="student student-one"><view class="student-head">⌣</view><view class="student-body"></view></view>
+        <view class="student student-two"><view class="student-head">•ᴗ•</view><view class="student-body"></view></view>
+        <view class="student student-three"><view class="student-head">◡</view><view class="student-body"></view></view>
+      </view>
+      <view class="hero-card">
+        <text class="hero-card-title">{{activeVersion.title}} · V{{activeVersion.bank_version}}</text>
+        <text class="hero-card-copy">可在 {{versionTitles}} 中选择当前校园阶段。</text>
+        <view class="meta-row"><text class="meta-pill">{{versions.length}} 个版本可选</text><text class="meta-pill">约 3 分钟</text><text class="meta-pill">没有标准答案</text></view>
+      </view>
+      <view wx:if="{{localMode}}" class="service-chip service-{{serviceStatus}}">
+        <text>{{serviceMessage}}</text>
+        <button wx:if="{{serviceStatus !== 'connected' && serviceStatus !== 'checking'}}" bindtap="retryServiceHealth">重新检查</button>
+      </view>
+    </view>
+    <view class="welcome-actions">
+      <button class="primary-button full-width" bindtap="showIdentity">选择身份并开始 <text>→</text></button>
+      <text wx:if="{{localMode}}" class="mode-hint">本地开发模式</text>
+    </view>
+  </scroll-view>
+
+  <view wx:elif="{{screen === 'identity'}}" class="screen page identity-screen">
+    <view class="mini-header"><button class="back-button" bindtap="showWelcome">←</button><text class="mini-brand">校园人设实验室</text><view class="header-spacer"></view></view>
+    <text class="section-label">{{versions.length}} 个版本已开放</text>
+    <view class="hero-title identity-title"><text class="title-line">选择你的</text><text class="title-line">校园阶段</text></view>
+    <text class="hero-subtitle">当前可选：{{versionList}}。选择后加载对应校园场景。</text>
+    <view wx:if="{{localMode}}" class="service-chip service-{{serviceStatus}}">
+      <text>{{serviceMessage}}</text>
+      <button wx:if="{{serviceStatus !== 'connected' && serviceStatus !== 'checking'}}" bindtap="retryServiceHealth">重新检查</button>
+    </view>
+    <view wx:if="{{error}}" class="quiz-error" role="alert">{{error}}</view>
+    <view class="identity-list">
+      <button wx:for="{{versions}}" wx:key="id" class="identity-card {{item.selected ? 'is-selected' : ''}}" style="{{item.cardStyle}}" data-version="{{item.id}}" bindtap="selectVersion">
+        <text class="identity-icon">{{item.icon}}</text>
+        <view class="identity-copy"><text class="identity-name">{{item.identity_name}}</text><text class="identity-desc">{{item.identity_desc}}</text></view>
+        <text class="checkmark">{{item.selected ? '✓' : ''}}</text>
+      </button>
+    </view>
+    <view class="identity-tip">⌁ 选择后加载对应题库；各版本答案与进度独立保存。</view>
+    <button class="primary-button full-width" data-version="{{activeVersion.id}}" bindtap="selectVersion">进入{{activeVersion.title}}测试 →</button>
+  </view>
+
+  <view wx:elif="{{screen === 'loading'}}" class="screen page center-screen loading-screen">
+    <view class="loading-orbit">✦</view><text class="hero-title loading-title">正在加载题库</text><text class="hero-subtitle">请稍候，正在整理对应校园场景。</text>
+  </view>
+
+  <view wx:elif="{{screen === 'quiz'}}" class="screen page quiz-screen">
+    <view class="mini-header"><button class="back-button" bindtap="showIdentity">←</button><text class="mini-brand">{{activeVersion.quiz_label}}</text><button class="icon-button" bindtap="showWelcome">×</button></view>
+    <view class="quiz-topline"><text class="quiz-count">第 {{questionNumber}} 题 / 共 {{questionTotal}} 题</text><text class="quiz-percent">{{progress}}%</text></view>
+    <view class="progress-track"><view class="progress-value" style="width:{{progress}}%"></view></view>
+    <text class="question-kicker">{{questionKicker}}</text>
+    <view class="question-card"><text class="question-title">{{question.text}}</text><text class="question-hint">{{questionHint}}</text></view>
+    <view wx:if="{{error}}" class="quiz-error" role="alert"><text>{{error}}</text><button wx:if="{{canRetry}}" class="retry-button" bindtap="retryResult">重新生成结果</button></view>
+    <view class="option-list options-list">
+      <view wx:for="{{options}}" wx:key="id" class="option-button {{item.selected ? 'is-selected' : ''}}" data-index="{{index}}" bindtap="selectOption" role="button" aria-label="{{item.letter}}，{{item.text}}">
+        <text class="option-letter">{{item.letter}}</text><text class="option-text">{{item.text}}</text>
+      </view>
+    </view>
+    <view class="quiz-footer">
+      <button class="text-button" disabled="{{!canGoPrevious}}" bindtap="previousQuestion">← 上一题</button>
+      <button wx:if="{{showManualNext}}" class="primary-button mini-next" bindtap="nextQuestion">{{questionNumber === questionTotal ? '查看结果' : '下一题 →'}}</button>
+    </view>
+  </view>
+
+  <view wx:elif="{{screen === 'analysis'}}" class="screen page center-screen analysis-screen">
+    <view class="analysis-orbit"><text>✦</text></view>
+    <text class="section-label">{{activeVersion.quiz_label}} · 答案已收到</text>
+    <view class="hero-title analysis-title"><text class="title-line">正在整理你的</text><text class="title-line scribble">校园轨迹</text></view>
+    <text class="hero-subtitle">主标签与四维计算不包含最后一道自我认知题</text>
+    <view class="analysis-steps"><text>✓ 题目完成</text><text>✓ 服务端计算</text><text>· 生成结果</text></view>
+  </view>
+
+  <scroll-view wx:elif="{{screen === 'result'}}" class="screen page result-screen" scroll-y>
+    <view class="mini-header"><button class="back-button" bindtap="backToQuiz">←</button><text class="mini-brand">{{activeVersion.title}} · 测试完成</text><button class="icon-button" bindtap="showWelcome">×</button></view>
+    <text class="result-kicker">✦ 你的校园隐藏人设是</text>
+    <view class="result-hero">
+      <view class="result-art-stage" style="background:{{character.hero_background}};">
+        <text wx:for="{{character.decorations}}" wx:key="*this" wx:if="{{item === 'sparkle'}}" class="result-decoration result-decoration-sparkle">✦</text>
+        <text wx:for="{{character.decorations}}" wx:key="*this" wx:if="{{item === 'star'}}" class="result-decoration result-decoration-star">★</text>
+        <text wx:for="{{character.decorations}}" wx:key="*this" wx:if="{{item === 'leaf'}}" class="result-decoration result-decoration-leaf">⌁</text>
+        <view wx:if="{{character.character_image}}" class="result-character-wrap result-character-position-{{character.character_position}}" style="transform:scale({{character.character_scale}});"><image class="result-character-image" src="{{character.character_image}}" data-src="{{character.character_image}}" binderror="handleCharacterError" mode="aspectFit" aria-label="{{character.character_alt}}" /></view>
+        <view wx:else class="result-avatar result-character-fallback">{{character.fallback_icon}}</view>
+      </view>
+      <view class="result-summary"><text class="result-name">{{result.tag_name}}</text><text class="result-short-desc">{{result.tag_short_desc}}</text><view class="tags"><text wx:for="{{result.keywords}}" wx:key="*this" class="tag">{{item}}</text></view></view>
+    </view>
+    <view class="result-card result-section"><text class="section-heading">完整人设解读</text><text wx:for="{{descriptions}}" wx:key="*this" class="result-paragraph">{{item}}</text></view>
+    <view class="result-card result-section"><text class="section-heading">你的四维度轨迹</text><view class="dimension-bars"><view wx:for="{{dimensionRows}}" wx:key="label" class="dimension-row"><text class="dimension-label">{{item.label}}</text><view class="dimension-track"><view class="dimension-value" style="width:{{item.width}}"></view></view><text class="dimension-number">{{item.value}}</text></view></view><text wx:if="{{result.match_method}}" class="match-method">{{result.match_method}}</text></view>
+    <view class="result-card result-section"><text class="section-heading">你的直觉自我认知</text><text class="result-paragraph">{{result.self_perception.text}}</text><text class="match-method">Q{{result.self_perception.qid}} · 不参与主标签和四维计算</text></view>
+    <view class="result-card result-section"><text class="section-heading">趣味彩蛋</text><text wx:if="{{result.easter_eggs.length === 0}}" class="match-method">这次没有触发彩蛋</text><view wx:for="{{result.easter_eggs}}" wx:key="qid" class="egg-row"><text class="egg-label">Q{{item.qid}} · 趣味彩蛋</text><text>{{item.value}}</text></view></view>
+    <view class="result-card result-section share-copy-section"><text class="section-heading">分享文案</text><text class="result-paragraph">{{result.share_copy}}</text></view>
+    <view class="result-actions"><button class="primary-button full-width" open-type="share" bindtap="shareResult">分享我的校园人设</button><button class="secondary-button" bindtap="openShareFallback">预览分享文案（非生成海报）</button><button class="secondary-button" bindtap="previewPosterModel">海报数据已就绪（图片未生成）</button><button class="secondary-button" bindtap="restart">重新测试</button></view>
+  </scroll-view>
+
+  <view wx:if="{{shareFallbackVisible}}" class="share-backdrop" bindtap="closeShareFallback">
+    <view class="share-modal" catchtap="stopPropagation">
+      <button class="modal-close" bindtap="closeShareFallback">×</button><text class="result-kicker">分享文案预览（非生成海报）</text>
+      <view class="share-poster"><text class="poster-sparkle">✦</text><view class="poster-avatar">{{activeVersion.icon}}</view><text class="poster-version">{{shareSnapshot.versionTitle}}</text><text class="share-tag">{{shareSnapshot.tag_name}}</text><text class="share-copy">{{shareSnapshot.share_copy}}</text><text class="share-hashtags">#{{shareSnapshot.versionTitle}} #校园人设测试 #{{shareSnapshot.tag_name}}</text><view class="poster-code">小程序码</view></view>
+      <text class="share-title">生成我的校园人设卡</text><text wx:if="{{shareFeedback}}" class="share-feedback">{{shareFeedback}}</text><button class="primary-button full-width" bindtap="closeShareFallback">知道啦</button>
+    </view>
+  </view>
+</view>

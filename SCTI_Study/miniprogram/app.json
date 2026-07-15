@@ -1,0 +1,14 @@
+{
+  "pages": ["pages/index/index"],
+  "window": {
+    "navigationBarTitleText": "校园人设测试",
+    "navigationBarBackgroundColor": "#fbf7ec",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fbf7ec"
+  },
+  "networkTimeout": {
+    "request": 12000
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

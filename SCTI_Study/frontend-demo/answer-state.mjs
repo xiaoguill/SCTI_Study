@@ -17,6 +17,12 @@ export function normalizeStoredAnswers(questions, storedAnswers) {
   return normalized;
 }
 
+export function restoreProgressSnapshot(snapshot, bank) {
+  if (!snapshot || snapshot.version !== bank.version || snapshot.bankVersion !== bank.bank_version) return null;
+  const answers = normalizeStoredAnswers(bank.questions, snapshot.answers);
+  return { ...snapshot, answers };
+}
+
 export function firstUnansweredIndex(questions, answers) {
   return questions.findIndex((question) => normalizedSelection(question, answers?.[question.id]) === null);
 }

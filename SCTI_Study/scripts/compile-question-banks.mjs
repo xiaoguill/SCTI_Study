@@ -1,14 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateAlgorithmProfile, validateBank } from "./validate-question-banks.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
-const write = (file, value) => {
+const writeJson = (file, value) => {
   const target = path.join(root, file);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 };
+const ALGORITHM_PROFILE = "three-layer.v2.0.0";
 
 const SOURCES = [
   {
@@ -101,7 +103,8 @@ function parseQuestions(markdown, source, tags) {
     });
     const expected = id === 20 ? 16 : 4;
     if (options.length !== expected) throw new Error(`${source.version} Q${id} 解析到 ${options.length} 个选项，期望 ${expected}`);
-    return { id, text: title, type: id === 20 ? "self_portrait" : "single_choice", result_effect: eggOnly ? "egg_only" : "scored", options };
+    const resultEffect = id === 20 ? "self_perception_only" : (eggOnly ? "egg_only" : "scored");
+    return { id, text: title, type: id === 20 ? "self_portrait" : "single_choice", result_effect: resultEffect, options };
   });
 }
 
@@ -162,6 +165,7 @@ function buildFromMarkdown(source) {
   return {
     bank: {
       "$schema": "../../schemas/question-bank.schema.json", version: source.version, bank_version: "5.0.0", status: "active",
+      algorithm_profile: ALGORITHM_PROFILE,
       source: { document: source.file, extraction: "v5.0.0 markdown compiler", weight_completion: "权重完全按题目选项映射提取；无权重的 egg_only 题分数为空，四维度为中性 [3,3,3,3]。" },
       dimension_config: { labels: source.labels }, tags, questions, easter_eggs: eggs(questions)
     },
@@ -170,9 +174,10 @@ function buildFromMarkdown(source) {
 }
 
 function buildUniversity() {
-  const bank = JSON.parse(read("campus_persona/data/university-bank.json"));
+  const bank = JSON.parse(read("data/banks/university.v5.0.0.json"));
   bank.$schema = "../../schemas/question-bank.schema.json";
   bank.bank_version = "5.0.0";
+  bank.algorithm_profile = ALGORITHM_PROFILE;
   bank.source = { document: "校园人设测试_大学版V5_完整题目与算法.md", extraction: "迁移现有 V5.0.1 私有题库；原文完整权重附录已在既有构建产物中固化。" };
   bank.dimension_config = { labels: Array.isArray(bank.dimension_config?.labels) ? bank.dimension_config.labels : Object.values(bank.dimension_config).filter((value) => typeof value === "string") };
   for (const tag of bank.tags) {
@@ -193,12 +198,35 @@ function buildUniversity() {
   return { bank, revisions: [] };
 }
 
-const generated = [buildUniversity(), ...SOURCES.map(buildFromMarkdown)];
-const banks = generated.map((item) => item.bank);
-for (const bank of banks) write(`data/banks/${bank.version}.v5.0.0.json`, bank);
-write("data/banks/revision-log.v5.0.0.json", {
-  version: "5.0.0", policy: "完整核心签名必须唯一；原文明确写出的修正优先于同一单元格中被替换的旧引用。",
-  source_gaps: ["高中版与硕博版未提供大学版附录 A 式独立权重表；本编译器直接提取题目选项中的 0/1/2 映射，不把未声明信号补造成权重。", "高中版与硕博版未提供逐标签结果页与分享文案；按标签表的一句话描述和核心画像补齐，并通过统一字数校验。"],
-  revisions: generated.flatMap((item) => item.revisions)
-});
-console.log(`Compiled ${banks.map((bank) => `${bank.version}:${bank.questions.length}Q/${bank.tags.length}T`).join(", ")}`);
+export function compileQuestionBanks({ write = true } = {}) {
+  const generated = [buildUniversity(), ...SOURCES.map(buildFromMarkdown)];
+  const banks = generated.map((item) => item.bank);
+  const profileIds = [...new Set(banks.map((bank) => bank.algorithm_profile))];
+  const profiles = Object.fromEntries(profileIds.map((id) => {
+    const profile = JSON.parse(read(`data/algorithms/${id}.json`));
+    validateAlgorithmProfile(profile);
+    return [id, profile];
+  }));
+
+  for (const bank of banks) {
+    if (!profiles[bank.algorithm_profile]) throw new Error(`[${bank.version}] referenced algorithm profile is missing`);
+    validateBank(bank, bank.tags[0]?.prefix);
+  }
+
+  const revisionLog = {
+    version: "5.0.0", policy: "完整核心签名必须唯一；原文明确写出的修正优先于同一单元格中被替换的旧引用。",
+    source_gaps: ["高中版与硕博版未提供大学版附录 A 式独立权重表；本编译器直接提取题目选项中的 0/1/2 映射，不把未声明信号补造成权重。", "高中版与硕博版未提供逐标签结果页与分享文案；按标签表的一句话描述和核心画像补齐，并通过统一字数校验。"],
+    revisions: generated.flatMap((item) => item.revisions)
+  };
+
+  if (write) {
+    for (const bank of banks) writeJson(`data/banks/${bank.version}.v5.0.0.json`, bank);
+    writeJson("data/banks/revision-log.v5.0.0.json", revisionLog);
+  }
+  return { banks, profiles, revisionLog };
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const { banks } = compileQuestionBanks();
+  console.log(`Compiled ${banks.map((bank) => `${bank.version}:${bank.questions.length}Q/${bank.tags.length}T`).join(", ")}`);
+}

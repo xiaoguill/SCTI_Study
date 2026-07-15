@@ -1,77 +1,58 @@
-# 校园人设测试 V5.0 MVP 规格冻结
+# 校园人设测试 V5.0 三版本规格
 
-本文是本轮开发的执行规格，优先级高于原 PRD 中未明确的描述。当前 MVP 只实现大学版微信小程序流程；高中版、硕博版、QQ 端、历史记录页和管理后台留到后续版本。
+本文用三版本实现替代旧的 university-only MVP 冻结说明。详细架构、协议和验收标准以 [配置驱动的三版本校园人设测试设计](../../docs/superpowers/specs/2026-07-13-config-driven-three-version-campus-persona-design.md) 为准。
 
 ## 1. 范围
 
-- 版本：`university` / `V5.0.1`
-- 题目：20 题；Q1-Q19 每题 4 个选项；Q20 16 个选项
-- 标签：U1-U16 共 16 个
-- 平台：微信小程序
-- 后端：微信云开发云函数 + 文档数据库
-- 本轮交付：欢迎页、大学版答题、后端三层算法、结果页、基础转发分享、分享记录
-- 本轮不交付：高中/硕博题库、QQ 端、服务端海报渲染、历史记录、统计看板、题库管理端
+- 身份版本：`high_school`、`university`、`graduate`，均由版本注册表启用；
+- 每版 20 题、16 个标签；Q1-Q19 每题 4 个选项，Q20 为 16 个直觉自我认知选项；
+- 三版共享页面、状态层、提交协议、判定引擎与 CloudBase 云函数；
+- 题库、主题、展示文案、结果、分享文案和算法参数均由配置驱动；
+- 浏览器验收客户端已覆盖三版；原生微信客户端适配与发布仍属于单独生产阶段；
+- QQ 端、历史记录页、统计看板、题库管理端和服务端海报渲染不在本轮范围。
 
-## 2. 冲突解决
+## 2. 权威数据与构建边界
 
-### 2.1 题库阶段
+根目录 `data/banks/*.json`、`data/quiz-versions.v1.json` 和 `data/algorithms/*.json` 是运行配置的唯一权威来源。Markdown 只用于需求追溯；所有前端、`get-bank` 与 `submit-quiz` 部署 JSON 均由 `npm run build:banks` 生成，不得手工编辑。
 
-原 PRD 同时把三套题库列为 P0，又把 V5.0/V5.1/V5.2 作为阶段规划。本轮按阶段规划执行：V5.0 只启用大学版。所有接口强制接收 `version=university`，其他版本返回 `404`。
+正常更新题目/文案、算法 profile 或新增版本时，只修改规范数据并重新校验、构建、测试，不需要修改前端业务代码。
 
-### 2.2 结果影响字段
+## 3. 结果影响与算法归属
 
-每道题都必须显式声明 `result_effect`：
+每道题必须显式声明 `result_effect`。统一算法 profile 区分：
 
-```json
-{ "result_effect": "scored" }
-```
+- `scored`：可参与主标签和四维计算；
+- `egg_only`：只收集彩蛋；
+- `self_perception_only`：只返回直觉自我认知。
 
-或：
+Q20 固定为 `self_perception_only`，不参与核心命中、累计分或四维向量。固定 Q1-Q19 后遍历 Q20 的 16 个选项，主标签与四维结果必须保持不变。
 
-```json
-{ "result_effect": "egg_only" }
-```
+最终结果以 `submit-quiz` 服务端算法为准。浏览器本地模式复用同一个算法模块，仅用于验收；公开前端不接收 `scores`、`core_questions`、标签目标向量或私有阈值。
 
-本版规则：Q5、Q8、Q12、Q19 为 `egg_only`；Q16 虽然属于节奏破坏题，但保留文档中的权重，标记为 `scored`。算法只累加 `scored` 题的 `scores`。
+## 4. 身份索引与隐私
 
-### 2.3 算法归属
-
-最终结果以服务端为准。前端只负责拉取不含 `scores` 的题库、答题进度、本地恢复和分析动画；前端不会计算最终结果，也不会接收服务端完整权重。
-
-`submit-quiz` 云函数执行：
-
-1. 核心定选题精确匹配，命中即返回 `match_method=core`。
-2. 对 `result_effect=scored` 的题目做得分累积，最高分与次高分相差至少 3 分时返回 `match_method=score`。
-3. 否则根据四维度用户向量与标签目标向量的曼哈顿距离兜底，返回 `match_method=dimension`。
-
-题库原文没有为每个选项提供完整四维度向量。本 MVP 使用“选项权重对应标签目标向量的加权平均”生成并固化 `options[].dimensions`；无权重的彩蛋题使用 `[3,3,3,3]`。这是一条透明的 MVP 补全规则，正式上线前应由产品重新校准。
-
-### 2.4 身份索引与隐私
-
-不保存原始 openid。云函数使用环境变量 `OPENID_HMAC_SECRET` 对 `platform + provider_subject` 做 HMAC-SHA256，数据库只保存：
+不保存原始 openid。云函数使用只存在于云函数环境中的 `OPENID_HMAC_SECRET`，对 `platform + provider_subject` 做 HMAC-SHA256，数据库只保存：
 
 ```text
 provider_subject_hash + platform
 ```
 
-日志禁止输出 openid、provider_subject_hash、token 和完整答题数据。
+日志禁止输出 openid、provider_subject_hash、token、密钥和完整答题数据。仓库不得包含 AppID、CloudBase 环境 ID、AppSecret、用户身份或带凭据的端点。
 
-## 3. 前端数据边界
+## 5. 前端与平台边界
 
-`get-bank` 返回：题干、选项文本、题型、`result_effect`、彩蛋映射和展示用标签文案；不返回 `scores`。服务端私有题库只存放在 `submit-quiz` 云函数包内。
+`get-bank` 按版本返回题干、选项文本、题型、`result_effect` 和展示配置；`submit-quiz` 按同一版本加载私有题库与算法 profile。未知、关闭或题库版本不匹配的请求返回明确错误，不回退到大学版。
 
-浏览器版 `frontend-demo` 在没有 `wx.cloud` 时使用本地演示回包，仅用于验收页面规格；进入真实微信小程序后由 `wx.cloud.callFunction` 调用云函数。
+`frontend-demo` 是 browser acceptance client，不能作为小程序上传；`miniprogram/` 是原生 WXML/WXSS 客户端。本地模式只用于微信开发者工具，真机与体验版必须切换 CloudBase。真实云部署、体验版测试、审核提交和正式发布仍属于后续生产步骤；此代码交接不需要 AppSecret。
 
-## 4. 分享边界
+## 6. 分享与发布边界
 
-本轮实现 `onShareAppMessage` / `onShareTimeline` 所需的结果路径和 `record-share` 云函数。海报生成、云存储图片和小程序码先保留接口位置，不在 MVP 阶段伪造已完成状态。
-
-分享路径：
+分享路径中的版本必须动态使用当前身份：
 
 ```text
-/pages/result/index?tag={tagId}&v=university
+/pages/result/index?tag={tagId}&v={version}
 ```
 
-## 5. 发布前阻塞项
+`record-share` 只记录经清洗的分享事件。海报、云存储图片和小程序码不伪造完成状态。
 
-以下信息需要在真实部署前补齐，不写入仓库：微信 AppID、CloudBase 环境 ID、`OPENID_HMAC_SECRET`、云数据库索引、云函数部署权限和小程序码素材。
+真实发布前仍需用户提供或完成已授权 AppID、微信开发者工具扫码登录、CloudBase 环境选择、账号认证/服务类目/计费/审核权限、数据库集合与索引，以及云函数环境变量。部署步骤见 [微信 CloudBase 部署交接](wechat-cloud-deployment.md)。

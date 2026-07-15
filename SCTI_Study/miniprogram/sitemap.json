@@ -1,0 +1,9 @@
+{
+  "desc": "校园人设测试页面索引配置",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index"
+    }
+  ]
+}
